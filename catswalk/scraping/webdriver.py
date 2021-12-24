@@ -1,19 +1,16 @@
 import logging
-import requests
-from requests import Session
-import json
 from bs4 import BeautifulSoup
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from abc import ABCMeta, abstractmethod
-from catsrequests.http import Request
+from catswalk.scraping.request import CWRequest
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-class WebDriver:
-    def __init__(self, binary_location, executable_path, proxy, headless):
+
+class CWWebDriver:
+    def __init__(self, binary_location: str, executable_path: str, headless: bool, proxy: str):
         """[summary]
 
         Arguments:
@@ -28,41 +25,20 @@ class WebDriver:
         if headless:
             options.add_argument('--headless')
             # https://www.ytyng.com/blog/ubuntu-chromedriver/
-            options.add_argument("--disable-dev-shm-usage") # overcome limited resource problems
-            options.add_argument("start-maximized") # open Browser in maximized mode
-            options.add_argument("disable-infobars") # disabling infobars
-            options.add_argument("--disable-extensions") # disabling extensions
-            options.add_argument("--disable-gpu") # applicable to windows os only
-            options.add_argument("--no-sandbox") # Bypass OS security model
+            options.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
+            options.add_argument("start-maximized")  # open Browser in maximized mode
+            options.add_argument("disable-infobars")  # disabling infobars
+            options.add_argument("--disable-extensions")  # disabling extensions
+            options.add_argument("--disable-gpu")  # applicable to windows os only
+            options.add_argument("--no-sandbox")  # Bypass OS security model
         if proxy:
             logging.info("WebDriverSession proxy on")
             options.add_argument(f"proxy-server={proxy}")
 
         caps = DesiredCapabilities.CHROME
         caps['loggingPrefs'] = {'performance': 'INFO'}
-        self.driver = webdriver.Chrome(options=options, executable_path=executable_path,desired_capabilities=caps)
+        self.driver = webdriver.Chrome(options=options, executable_path=executable_path, desired_capabilities=caps)
         self.driver.implicitly_wait(5)
-
-    @classmethod
-    def create_instance_from_json(cls, json_path:str):
-        with open(json_path, "r") as f:
-            j = json.load(f)
-            binary_location = j["web_driver"]["binary_location"]
-            executable_path = j["web_driver"]["executable_path"]
-            proxy = None
-            try:
-                proxy = j["web_driver"]["proxy"]
-            except Exception:
-                print("proxy is None")
-            headless = False
-            if j["web_driver"]["mode"] == "headless":
-                headless = True
-            d = CatsWebDriver(
-                binary_location=binary_location,
-                executable_path=executable_path,
-                proxy=proxy,
-                headless=headless)
-        return d
 
     def close(self):
         """[Close WebDriverSession, if chromewebdriver dosen't kill, plsease execute "killall chromedriver"]
@@ -75,15 +51,15 @@ class WebDriver:
 
     @property
     def cookies(self):
-            return self.driver.get_cookies()
+        return self.driver.get_cookies()
 
-    def to_request_session(self) -> Request: 
+    def to_request_session(self) -> CWRequest:
         """[summary]
         
         Returns:
             Request -- [description]
         """
-        session = Request()
+        session = CWRequest()
         for cookie in self.driver.get_cookies():
             self.driver.cookies.set(cookie["name"], cookie["value"])
         return session
@@ -124,31 +100,3 @@ class WebDriver:
         for entry in self.driver.get_log('performance'):
             result.append(entry['message'])
         return result
-
-    def get_google_ad_iframe_ids(self):
-        """[summary]
-        
-        Returns:
-            [type] -- [description]
-        """
-        iframes = self.driver.html.findAll(name="iframe")
-        print(f"iframe num is {len(iframes)}")
-        iframe_ids = list(map(lambda x: x.get("id"), iframes))
-        ad_iframe_ids = list(filter(lambda x: x != None and x.count("google_ads_iframe"), iframe_ids))
-        return ad_iframe_ids
-    
-    def get_iframe_contents(self):
-        """[summary]
-        
-        Returns:
-            [type] -- [description]
-        """
-        iframe_ids = self.get_ad_iframe_ids(html)
-        r = []
-        for iframe_id in iframe_ids:
-            iframe_elem = self.driver.find_element_by_id(iframe_id)
-            self.driver.switch_to.frame(iframe_elem)
-            ihtml = self.html
-            r.append((iframe_id, ihtml))
-            self.driver.switch_to.default_content()
-        return r
