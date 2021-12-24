@@ -7,6 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from catswalk.scraping.request import CWRequest
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import os
 
 
 class CWWebDriver:
@@ -30,6 +31,7 @@ class CWWebDriver:
             options.add_argument("--disable-gpu")  # applicable to windows os only
             options.add_argument("--no-sandbox")  # Bypass OS security model
         elif execution_env == "aws_lambda":
+            os.environ['HOME'] = '/opt/browser/'
             executable_path = "/opt/browser/chromedriver"
             options.binary_location = "/opt/browser/headless-chromium"
             options.add_argument("--headless")
@@ -53,7 +55,7 @@ class CWWebDriver:
 
         caps = DesiredCapabilities.CHROME
         caps['loggingPrefs'] = {'performance': 'INFO'}
-        logging.info(f"WebDriverSession.__init__ : {binary_location}, {executable_path}, {proxy}, {execution_env}")
+        #logging.info(f"WebDriverSession.__init__ : {binary_location}, {executable_path}, {proxy}, {execution_env}")
         self.driver = webdriver.Chrome(options=options, executable_path=executable_path, desired_capabilities=caps)
         self.driver.implicitly_wait(5.0)
 
