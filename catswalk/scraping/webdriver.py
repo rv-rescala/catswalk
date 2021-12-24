@@ -10,33 +10,50 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 class CWWebDriver:
-    def __init__(self, binary_location: str, executable_path: str, headless: bool, proxy: str):
+    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: str = "local", proxy: str = None):
         """[summary]
 
-        Arguments:
-            binary_location {[type]} -- [description]
-            executable_path {[type]} -- [description]
-            proxy {[type]} -- [description]
-            headless {[type]} -- [description]
+        Args:
+            binary_location (str): [description]
+            executable_path (str): [description]
+            execution_env (str, optional): [local, local_headless, aws]. Defaults to "local".
+            proxy (str, optional): [description]. Defaults to None.
         """
         options = Options()
-        options.binary_location = binary_location
-        logging.info(f"WebDriverSession.__init__ : {binary_location}, {executable_path}, {proxy}, {headless}")
-        if headless:
-            options.add_argument('--headless')
-            # https://www.ytyng.com/blog/ubuntu-chromedriver/
+        if execution_env == "local_headless":
+            options.binary_location = binary_location
+            options.add_argument('--headless') # https://www.ytyng.com/blog/ubuntu-chromedriver/
             options.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
             options.add_argument("start-maximized")  # open Browser in maximized mode
             options.add_argument("disable-infobars")  # disabling infobars
             options.add_argument("--disable-extensions")  # disabling extensions
             options.add_argument("--disable-gpu")  # applicable to windows os only
             options.add_argument("--no-sandbox")  # Bypass OS security model
+        elif execution_env == "aws_lambda":
+            executable_path = "/opt/browser/chromedriver"
+            options.binary_location = "/opt/browser/headless-chromium"
+            options.add_argument("--headless")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--single-process")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--window-size=1280x1696")
+            options.add_argument("--disable-application-cache")
+            options.add_argument("--disable-infobars")
+            options.add_argument("--hide-scrollbars")
+            options.add_argument("--enable-logging")
+            options.add_argument("--log-level=0")
+            options.add_argument("--ignore-certificate-errors")
+            options.add_argument("--homedir=/tmp")
+            options.add_argument('--disable-dev-shm-usage')
+        else:
+            options.binary_location = binary_location
         if proxy:
             logging.info("WebDriverSession proxy on")
             options.add_argument(f"proxy-server={proxy}")
 
         caps = DesiredCapabilities.CHROME
         caps['loggingPrefs'] = {'performance': 'INFO'}
+        logging.info(f"WebDriverSession.__init__ : {binary_location}, {executable_path}, {proxy}, {execution_env}")
         self.driver = webdriver.Chrome(options=options, executable_path=executable_path, desired_capabilities=caps)
         self.driver.implicitly_wait(5)
 

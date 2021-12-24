@@ -11,7 +11,7 @@ class TestCatsWebDriver(unittest.TestCase):
     def test_simple_get(self):
         """[python -m unittest tests.scraping.test_web_driver.TestCatsWebDriver.test_simple_get]
         """
-        request = CWWebDriver(binary_location=self.binary_location, executable_path=self.executable_path, proxy=self.proxy, headless=self.headless)
+        request = CWWebDriver(binary_location=self.binary_location, executable_path=self.executable_path)
         html = request.move(url="https://yahoo.co.jp")
         time.sleep(10)
         request.close()
@@ -19,7 +19,7 @@ class TestCatsWebDriver(unittest.TestCase):
     def test_print_screen(self):
         """[python -m unittest tests.scraping.test_web_driver.TestCatsWebDriver.test_print_screen]
         """
-        request = CWWebDriver(binary_location=self.binary_location, executable_path=self.executable_path, proxy=self.proxy, headless=self.headless)
+        request = CWWebDriver(binary_location=self.binary_location, executable_path=self.executable_path)
         request.move(url="https://yahoo.co.jp")
         request.print_fullscreen("/tmp", "test_print_screen")
         time.sleep(10)
