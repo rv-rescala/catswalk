@@ -55,7 +55,7 @@ class CWWebDriver:
         caps['loggingPrefs'] = {'performance': 'INFO'}
         logging.info(f"WebDriverSession.__init__ : {binary_location}, {executable_path}, {proxy}, {execution_env}")
         self.driver = webdriver.Chrome(options=options, executable_path=executable_path, desired_capabilities=caps)
-        self.driver.implicitly_wait(5)
+        self.driver.implicitly_wait(5.0)
 
     def close(self):
         """[Close WebDriverSession, if chromewebdriver dosen't kill, plsease execute "killall chromedriver"]
