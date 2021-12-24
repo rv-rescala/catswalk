@@ -89,6 +89,27 @@ class CWWebDriver:
     def move(self, url):
         self.driver.get(url)
 
+    def print_screen(self, w, h, path, filename):
+        """[summary]
+
+        Args:
+            w ([type]): [description]
+            h ([type]): [description]
+            path ([type]): [description]
+        """
+        # set window size
+        self.driver.set_window_size(w, h)
+
+        # Get Screen Shot
+        fullpath = f"{path}/{filename}.png"
+        self.driver.save_screenshot(fullpath)
+    
+    def print_fullscreen(self, path, filename):
+        # get width and height of the page
+        w = self.driver.execute_script("return document.body.scrollWidth;")
+        h = self.driver.execute_script("return document.body.scrollHeight;")
+        self.print_screen(w, h, path, filename)
+
     @property
     def html(self):
         html = self.driver.page_source.encode('utf-8')
