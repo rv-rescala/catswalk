@@ -8,10 +8,17 @@ from selenium.webdriver.chrome.options import Options
 from catswalk.scraping.request import CWRequest
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import os
+from enum import Enum
+
+
+class EXECUTION_ENV(Enum):
+    LOCAL = "local"
+    LOCAL_HEADLESS = "local_headless"
+    AWS_LAMBDA = "aws_lambda"
 
 
 class CWWebDriver:
-    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: str = "local", proxy: str = None):
+    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, proxy: str = None):
         """[summary]
 
         Args:
@@ -20,9 +27,14 @@ class CWWebDriver:
             execution_env (str, optional): [local, local_headless, aws]. Defaults to "local".
             proxy (str, optional): [description]. Defaults to None.
         """
+        self.binary_location = binary_location
+        self.executable_path = executable_path
+        self.execution_env = execution_env
+        self.proxy = proxy
+
         options = Options()
-        if execution_env == "local_headless":
-            options.binary_location = binary_location
+        if self.execution_env == EXECUTION_ENV.LOCAL_HEADLESS:
+            options.binary_location = self.binary_location
             options.add_argument('--headless') # https://www.ytyng.com/blog/ubuntu-chromedriver/
             options.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
             options.add_argument("start-maximized")  # open Browser in maximized mode
@@ -30,7 +42,7 @@ class CWWebDriver:
             options.add_argument("--disable-extensions")  # disabling extensions
             options.add_argument("--disable-gpu")  # applicable to windows os only
             options.add_argument("--no-sandbox")  # Bypass OS security model
-        elif execution_env == "aws_lambda":
+        elif self.execution_env == EXECUTION_ENV.AWS_LAMBDA:
             os.environ['HOME'] = '/opt/browser/'
             executable_path = "/opt/browser/chromedriver"
             options.binary_location = "/opt/browser/headless-chromium"
@@ -48,16 +60,35 @@ class CWWebDriver:
             options.add_argument("--homedir=/tmp")
             options.add_argument('--disable-dev-shm-usage')
         else:
-            options.binary_location = binary_location
-        if proxy:
+            options.binary_location = self.binary_location
+        if self.proxy:
             logging.info("WebDriverSession proxy on")
-            options.add_argument(f"proxy-server={proxy}")
+            options.add_argument(f"proxy-server={self.proxy}")
 
         caps = DesiredCapabilities.CHROME
         caps['loggingPrefs'] = {'performance': 'INFO'}
         #logging.info(f"WebDriverSession.__init__ : {binary_location}, {executable_path}, {proxy}, {execution_env}")
-        self.driver = webdriver.Chrome(options=options, executable_path=executable_path, desired_capabilities=caps)
+        self.driver = webdriver.Chrome(options=options, executable_path=self.executable_path, desired_capabilities=caps)
         self.driver.implicitly_wait(5.0)
+
+
+
+    def __enter__(self):
+        """
+
+        :return:
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+
+        :param exc_type:
+        :param exc_val:
+        :param exc_tb:
+        :return:
+        """
+        self.close()
 
     def close(self):
         """[Close WebDriverSession, if chromewebdriver dosen't kill, plsease execute "killall chromedriver"]
@@ -105,7 +136,7 @@ class CWWebDriver:
         """
         WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, _class)))
 
-    def move(self, url):
+    def move(self, url: str):
         self.driver.get(url)
 
     def print_screen(self, w, h, path, filename):

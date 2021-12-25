@@ -24,10 +24,29 @@ class CWRequest:
         Args:
             verify (bool, optional): [description]. Defaults to True.
         """
-        self.session = requests.Session()
-        self.session.verify = verify
+        self.verify = verify
         self.timeout = timeout
+        self.session = requests.Session()
+        self.session.verify = self.verify
+        self.timeout = self.timeout
+
+    def __enter__(self):
+        """
+
+        :return:
+        """
         self.print_global_info()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+
+        :param exc_type:
+        :param exc_val:
+        :param exc_tb:
+        :return:
+        """
+        self.close()
 
     @classmethod
     def parse_http_date(s):
