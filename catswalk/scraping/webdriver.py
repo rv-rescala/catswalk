@@ -9,6 +9,7 @@ from catswalk.scraping.request import CWRequest
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import os
 from enum import Enum
+from catswalk.scraping.types.type_response import ResponseHtml 
 
 
 class EXECUTION_ENV(Enum):
@@ -137,7 +138,18 @@ class CWWebDriver:
         WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, _class)))
 
     def move(self, url: str):
+        """[summary]
+
+        Args:
+            url (str): [description]
+        """
         self.driver.get(url)
+
+    def get(self, url: str):
+        self.move(url=url)
+        #WebDriverWait(self.driver, 10).until(EC.url_changes(url))
+        soup = BeautifulSoup(self.driver.page_source, "lxml")
+        return soup
 
     def print_screen(self, w, h, path, filename):
         """[summary]
