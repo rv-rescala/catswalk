@@ -102,6 +102,11 @@ class CWWebDriver:
 
     @property
     def cookies(self):
+        """[Get cookie info]
+
+        Returns:
+            [type]: [description]
+        """
         return self.driver.get_cookies()
 
     def to_request_session(self) -> CWRequest:
@@ -148,29 +153,47 @@ class CWWebDriver:
     def get(self, url: str):
         self.move(url=url)
         #WebDriverWait(self.driver, 10).until(EC.url_changes(url))
-        soup = BeautifulSoup(self.driver.page_source, "lxml")
+        soup = self.html
         return soup
 
-    def print_screen(self, w, h, path, filename):
+    def print_screen_by_position(self, w, h, output_path: str, filename:str):
         """[summary]
 
         Args:
             w ([type]): [description]
             h ([type]): [description]
-            path ([type]): [description]
+            output_path (str): [description]
+            filename (str): [description]
         """
         # set window size
         self.driver.set_window_size(w, h)
 
         # Get Screen Shot
-        fullpath = f"{path}/{filename}.png"
+        fullpath = f"{output_path}/{filename}.png"
         self.driver.save_screenshot(fullpath)
+
+    def print_screen_by_xpath(self, xpath:str, output_path: str, filename:str) -> str:
+        """[summary]
+
+        Args:
+            xpath (str): [description]
+            output_path (str): [description]
+            filename (str): [description]
+        """
+        # Get Screen Shot
+        fullpath = f"{output_path}/{filename}.png"
+        # 範囲を指定してスクリーンショットを撮る
+        png = self.driver.find_element_by_xpath(xpath).screenshot_as_png
+        # ファイルに保存
+        with open(fullpath, 'wb') as f:
+            f.write(png)
+        return fullpath
     
     def print_fullscreen(self, path, filename):
         # get width and height of the page
         w = self.driver.execute_script("return document.body.scrollWidth;")
         h = self.driver.execute_script("return document.body.scrollHeight;")
-        self.print_screen(w, h, path, filename)
+        self.print_screen_by_position(w, h, path, filename)
 
     @property
     def html(self):
