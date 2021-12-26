@@ -188,6 +188,23 @@ class CWWebDriver:
         with open(fullpath, 'wb') as f:
             f.write(png)
         return fullpath
+
+    def print_screen_by_class_name(self, class_name:str, output_path: str, filename:str) -> str:
+        """[summary]
+
+        Args:
+            class_name (str): [description]
+            output_path (str): [description]
+            filename (str): [description]
+        """
+        # Get Screen Shot
+        fullpath = f"{output_path}/{filename}.png"
+        # 範囲を指定してスクリーンショットを撮る
+        png = self.driver.find_element_by_class_name(class_name).screenshot_as_png
+        # ファイルに保存
+        with open(fullpath, 'wb') as f:
+            f.write(png)
+        return fullpath
     
     def print_fullscreen(self, path, filename):
         # get width and height of the page
