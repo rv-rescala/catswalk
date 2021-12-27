@@ -1,6 +1,7 @@
 import unittest
 from catswalk.scraping.webdriver import CWWebDriver
 import time
+from catswalk.scraping.types.type_webdriver import *
 
 class TestCWWebDriver(unittest.TestCase):
     binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -28,7 +29,7 @@ class TestCWWebDriver(unittest.TestCase):
     def test_print_screen(self):
         """[python -m unittest tests.scraping.test_web_driver.TestCWWebDriver.test_print_screen]
         """
-        request = CWWebDriver(binary_location=self.binary_location, executable_path=self.executable_path)
+        request = CWWebDriver(binary_location=self.binary_location, executable_path=self.executable_path, execution_env=EXECUTION_ENV.LOCAL,  device = DEVICE.MOBILE_GALAXY_S5)
         request.move(url="https://yahoo.co.jp")
         request.print_fullscreen("/tmp", "test_print_screen")
         time.sleep(10)

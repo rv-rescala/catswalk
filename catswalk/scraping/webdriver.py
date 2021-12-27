@@ -8,18 +8,14 @@ from selenium.webdriver.chrome.options import Options
 from catswalk.scraping.request import CWRequest
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import os
-from enum import Enum
 from catswalk.scraping.types.type_response import ResponseHtml 
+from catswalk.scraping.types.type_webdriver import EXECUTION_ENV, DEVICE, DEVICE_MODE
 
 
-class EXECUTION_ENV(Enum):
-    LOCAL = "local"
-    LOCAL_HEADLESS = "local_headless"
-    AWS_LAMBDA = "aws_lambda"
 
 
 class CWWebDriver:
-    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, proxy: str = None):
+    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None):
         """[summary]
 
         Args:
@@ -65,6 +61,10 @@ class CWWebDriver:
         if self.proxy:
             logging.info("WebDriverSession proxy on")
             options.add_argument(f"proxy-server={self.proxy}")
+
+        if device.value.mode == DEVICE_MODE.MOBILE:
+            mobile_emulation = { "deviceName": "Galaxy S5" }
+            options.add_experimental_option("mobileEmulation", mobile_emulation)
 
         caps = DesiredCapabilities.CHROME
         caps['loggingPrefs'] = {'performance': 'INFO'}
