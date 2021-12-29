@@ -10,12 +10,13 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import os
 from catswalk.scraping.types.type_response import ResponseHtml 
 from catswalk.scraping.types.type_webdriver import EXECUTION_ENV, DEVICE, DEVICE_MODE
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 
 
 class CWWebDriver:
-    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None):
+    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None, implicitly_wait = 5.0):
         """[summary]
 
         Args:
@@ -70,7 +71,7 @@ class CWWebDriver:
         caps['loggingPrefs'] = {'performance': 'INFO'}
         #logging.info(f"WebDriverSession.__init__ : {binary_location}, {executable_path}, {proxy}, {execution_env}")
         self.driver = webdriver.Chrome(options=options, executable_path=self.executable_path, desired_capabilities=caps)
-        self.driver.implicitly_wait(5.0)
+        self.driver.implicitly_wait(implicitly_wait)
 
 
 
@@ -117,7 +118,7 @@ class CWWebDriver:
         """
         session = CWRequest()
         for cookie in self.driver.get_cookies():
-            self.driver.cookies.set(cookie["name"], cookie["value"])
+            self.session.cookies.set(cookie["name"], cookie["value"])
         return session
 
     def wait_rendering_by_id(self, id, timeout=20):
@@ -142,7 +143,7 @@ class CWWebDriver:
         """
         WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, _class)))
 
-    def move(self, url: str):
+    def transition(self, url: str):
         """[summary]
 
         Args:
@@ -151,7 +152,7 @@ class CWWebDriver:
         self.driver.get(url)
 
     def get(self, url: str):
-        self.move(url=url)
+        self.transition(url=url)
         #WebDriverWait(self.driver, 10).until(EC.url_changes(url))
         soup = self.html
         return soup
@@ -211,6 +212,35 @@ class CWWebDriver:
         w = self.driver.execute_script("return document.body.scrollWidth;")
         h = self.driver.execute_script("return document.body.scrollHeight;")
         self.print_screen_by_position(w, h, path, filename)
+
+
+    def click_by_class_name(self, class_name:str) -> str:
+        """[summary]
+
+        Args:
+            class_name (str): [description]
+
+        Returns:
+            str: [description]
+        """
+        # Get Screen Shot
+        elem = self.driver.find_element_by_class_name(class_name)
+        elem.click()
+
+
+    def move_to_element_by_class_name(self, class_name:str) -> str:
+        """[summary]
+
+        Args:
+            class_name (str): [description]
+
+        Returns:
+            str: [description]
+        """
+        # Get Screen Shot
+        elem = self.driver.find_element_by_class_name(class_name)
+        elem.location_once_scrolled_into_view
+
 
     @property
     def html(self):
