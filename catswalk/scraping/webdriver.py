@@ -12,9 +12,6 @@ from catswalk.scraping.types.type_response import ResponseHtml
 from catswalk.scraping.types.type_webdriver import EXECUTION_ENV, DEVICE, DEVICE_MODE
 from selenium.webdriver.common.action_chains import ActionChains
 
-
-
-
 class CWWebDriver:
     def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None, implicitly_wait = 5.0):
         """[summary]
@@ -42,7 +39,7 @@ class CWWebDriver:
             options.add_argument("--no-sandbox")  # Bypass OS security model
         elif self.execution_env == EXECUTION_ENV.AWS_LAMBDA:
             os.environ['HOME'] = '/opt/browser/'
-            executable_path = "/opt/browser/chromedriver"
+            self.executable_path = "/opt/browser/chromedriver"
             options.binary_location = "/opt/browser/headless-chromium"
             options.add_argument("--headless")
             options.add_argument("--no-sandbox")
