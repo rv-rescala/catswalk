@@ -170,6 +170,7 @@ class CWWebDriver:
         # Get Screen Shot
         fullpath = f"{output_path}/{filename}.png"
         self.driver.save_screenshot(fullpath)
+        return fullpath
 
     def print_screen_by_xpath(self, xpath:str, output_path: str, filename:str) -> str:
         """[summary]

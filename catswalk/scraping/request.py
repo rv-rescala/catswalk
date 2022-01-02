@@ -190,6 +190,7 @@ class CWRequest:
             request_type (str, optional): [description]. Defaults to "get".
             post_data ([type], optional): [description]. Defaults to None.
         """
+        print(f"download: {url}")
         if request_type == "post":
             bi = self.post(url=url, post_data=post_data)
         else:
