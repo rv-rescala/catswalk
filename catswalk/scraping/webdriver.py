@@ -220,7 +220,7 @@ class CWWebDriver:
         h = self.driver.execute_script("return document.body.scrollHeight;")
         return self.print_screen_by_position(w, h, path, filename)
 
-    def print_fullscreen(self, path, filename):
+    def print_screen(self, path, filename):
         """[summary]
 
         Args:
