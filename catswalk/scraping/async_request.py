@@ -31,4 +31,5 @@ async def async_gets(url_list):
 class AsyncCWRequest:
     @classmethod
     def execute(self, url_list):
-        return asyncio.run(async_gets(url_list))
+        result = asyncio.run(async_gets(url_list))
+        return result

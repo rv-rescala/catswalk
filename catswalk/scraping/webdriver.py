@@ -26,6 +26,7 @@ class CWWebDriver:
         self.executable_path = executable_path
         self.execution_env = execution_env
         self.proxy = proxy
+        self.device = device
 
         options = Options()
         if self.execution_env == EXECUTION_ENV.LOCAL_HEADLESS:
@@ -205,10 +206,35 @@ class CWWebDriver:
         return fullpath
     
     def print_fullscreen(self, path, filename):
+        """[summary]
+
+        Args:
+            path ([type]): [description]
+            filename ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         # get width and height of the page
         w = self.driver.execute_script("return document.body.scrollWidth;")
         h = self.driver.execute_script("return document.body.scrollHeight;")
-        self.print_screen_by_position(w, h, path, filename)
+        return self.print_screen_by_position(w, h, path, filename)
+
+    def print_fullscreen(self, path, filename):
+        """[summary]
+
+        Args:
+            path ([type]): [description]
+            filename ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
+        # get width and height of the page
+        hw = self.driver.get_window_size()
+        w = hw["width"]
+        h = hw["height"]
+        return self.print_screen_by_position(w, h, path, filename)
 
 
     def click_by_class_name(self, class_name:str) -> str:
