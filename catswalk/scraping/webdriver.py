@@ -8,12 +8,11 @@ from selenium.webdriver.chrome.options import Options
 from catswalk.scraping.request import CWRequest
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import os
-from catswalk.scraping.types.type_response import ResponseHtml 
 from catswalk.scraping.types.type_webdriver import EXECUTION_ENV, DEVICE, DEVICE_MODE
-from selenium.webdriver.common.action_chains import ActionChains
+import time
 
 class CWWebDriver:
-    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None, implicitly_wait = 5.0):
+    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None, implicitly_wait = 5.0, debug:bool = False):
         """[summary]
 
         Args:
@@ -27,6 +26,7 @@ class CWWebDriver:
         self.execution_env = execution_env
         self.proxy = proxy
         self.device = device
+        self.debug = debug
 
         options = Options()
         if self.execution_env == EXECUTION_ENV.LOCAL_HEADLESS:
@@ -130,7 +130,7 @@ class CWWebDriver:
         """
         WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((By.ID, id)))
 
-    def wait_rendering_by_class(self, _class, timeout=20):
+    def wait_rendering_by_class(self, _class, by_css_selector: bool, timeout=20):
         """[summary]
         
         Arguments:
@@ -139,7 +139,11 @@ class CWWebDriver:
         Keyword Arguments:
             timeout {int} -- [description] (default: {20})
         """
-        WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, _class)))
+        print(f"wait_rendering_by_class: {_class}")
+        if by_css_selector:
+            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.XPATH, _class)))
+        else:
+            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, _class)))
 
     def transition(self, url: str):
         """[summary]
@@ -237,11 +241,13 @@ class CWWebDriver:
         h = hw["height"]
         return self.print_screen_by_position(w, h, path, filename)
 
-    def __get_elem_by_class(self, class_name:str, by_css_selector: bool=True):
-        if by_css_selector:
+    def __get_elem_by_class(self, class_name:str):
+        if len(class_name.split(" ")) > 1:
             _class_name = "." + ".".join(class_name.split(" "))
+            #self.wait_rendering_by_class(_class_name, True)
             elem = self.driver.find_element_by_css_selector(_class_name)
         else:
+            self.wait_rendering_by_class(class_name, False)
             elem = self.driver.find_element_by_class_name(class_name)
         return elem
 
@@ -255,11 +261,12 @@ class CWWebDriver:
             str: [description]
         """
         # Get Screen Shot
-        elem = self.driver.find_element_by_class_name(class_name)
+        elem = self.__get_elem_by_class(class_name)
         elem.click()
+        if self.debug:
+            time.sleep(5)
 
-
-    def move_to_element_by_class_name(self, class_name:str, by_css_selector: bool=True) -> str:
+    def move_to_element_by_class_name(self, class_name:str) -> str:
         """[summary]
 
         Args:
@@ -268,8 +275,10 @@ class CWWebDriver:
         Returns:
             str: [description]
         """
-        elem = self.__get_elem_by_class(class_name=class_name, by_css_selector=by_css_selector)
+        elem = self.__get_elem_by_class(class_name=class_name)
         elem.location_once_scrolled_into_view
+        if self.debug:
+            time.sleep(5)
 
 
     @property
