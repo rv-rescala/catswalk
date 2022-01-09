@@ -221,7 +221,7 @@ class CWWebDriver:
         h = self.driver.execute_script("return document.body.scrollHeight;")
         return self.print_screen_by_position(w, h, path, filename)
 
-    def print_screen(self, path, filename):
+    def print_screen_by_window(self, path, filename):
         """[summary]
 
         Args:
@@ -237,6 +237,13 @@ class CWWebDriver:
         h = hw["height"]
         return self.print_screen_by_position(w, h, path, filename)
 
+    def __get_elem_by_class(self, class_name:str, by_css_selector: bool=True):
+        if by_css_selector:
+            _class_name = "." + ".".join(class_name.split(" "))
+            elem = self.driver.find_element_by_css_selector(_class_name)
+        else:
+            elem = self.driver.find_element_by_class_name(class_name)
+        return elem
 
     def click_by_class_name(self, class_name:str) -> str:
         """[summary]
@@ -252,7 +259,7 @@ class CWWebDriver:
         elem.click()
 
 
-    def move_to_element_by_class_name(self, class_name:str) -> str:
+    def move_to_element_by_class_name(self, class_name:str, by_css_selector: bool=True) -> str:
         """[summary]
 
         Args:
@@ -261,8 +268,7 @@ class CWWebDriver:
         Returns:
             str: [description]
         """
-        # Get Screen Shot
-        elem = self.driver.find_element_by_class_name(class_name)
+        elem = self.__get_elem_by_class(class_name=class_name, by_css_selector=by_css_selector)
         elem.location_once_scrolled_into_view
 
 
