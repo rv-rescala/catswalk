@@ -10,6 +10,8 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import os
 from catswalk.scraping.types.type_webdriver import EXECUTION_ENV, DEVICE, DEVICE_MODE
 import time
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 
 class CWWebDriver:
     def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None, implicitly_wait = 5.0, debug:bool = False):
@@ -266,6 +268,18 @@ class CWWebDriver:
         if self.debug:
             time.sleep(5)
 
+
+    def scroll_by_offset(self, offset = 0):
+        script = "window.scrollTo(0, window.pageYOffset + " + str(offset) + ");"
+        self.driver.execute_script(script)
+
+    def scroll_to_bottom(self):
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+    def scroll_by_key(self, element, scroll_time):
+        for num in range(0, scroll_time):
+            element.send_keys(Keys.PAGE_DOWN)
+
     def move_to_element_by_class_name(self, class_name:str) -> str:
         """[summary]
 
@@ -275,11 +289,14 @@ class CWWebDriver:
         Returns:
             str: [description]
         """
-        elem = self.__get_elem_by_class(class_name=class_name)
-        elem.location_once_scrolled_into_view
+        element = self.__get_elem_by_class(class_name=class_name)
+        element.location_once_scrolled_into_view
+        time.sleep(10)
+        print("move end")
+        #self.scroll_by_key(element, 10)
+        self.scroll_to_bottom()
         if self.debug:
             time.sleep(5)
-
 
     @property
     def html(self):
