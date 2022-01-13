@@ -188,7 +188,6 @@ class CWWebDriver:
         """
         # Get Screen Shot
         fullpath = f"{output_path}/{filename}.png"
-        # 範囲を指定してスクリーンショットを撮る
         png = self.driver.find_element_by_xpath(xpath).screenshot_as_png
         # ファイルに保存
         with open(fullpath, 'wb') as f:
@@ -291,9 +290,6 @@ class CWWebDriver:
         """
         element = self.__get_elem_by_class(class_name=class_name)
         element.location_once_scrolled_into_view
-        time.sleep(10)
-        print("move end")
-        #self.scroll_by_key(element, 10)
         self.scroll_to_bottom()
         if self.debug:
             time.sleep(5)
