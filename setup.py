@@ -16,14 +16,14 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     
 setup(
     name='catswalk',
-    version='0.1.5',
+    version='0.1.9',
     description='Core library for crawling and web scraping',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='rv',
     author_email='yo-maruya@rescala.jp',
     keywords='python crawler scraping',
-    install_requires=['requests','bs4', 'selenium==3.141.0' , 'lxml', 'emoji', 'pysocks', 'aiohttp'],
+    install_requires=['requests','bs4', 'selenium==3.141.0' , 'lxml', 'emoji', 'pysocks', 'aiohttp', 'pillow'],
     url='https://rescala.jp',
     license='MIT',
     packages=find_packages(exclude=('tests')),

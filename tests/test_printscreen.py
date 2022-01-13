@@ -12,7 +12,12 @@ request = CWWebDriver(binary_location=binary_location, executable_path=executabl
 #url="https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python"
 #url="https://video.unext.jp/book/title/BSD0000027810"
 url="https://comic.k-manga.jp/title/95912/pv"
-request.print_screen_by_size(100, 1000, "/tmp", "size")
+request.get(url=url)
+#class_name = "AkamaiImage__AdjustedImg-d0gvt4-0 gRoDaG"
+#class_name = "AkamaiImage__AdjustedImg-d0gvt4-0 gRoDaG"
+class_name = "gaevent-detail-notlogin-bookchapter btn"
+request.move_to_element_by_class_name(class_name)
+request.print_screen_by_hight(300, "/tmp", "hoge")
 
 time.sleep(1000)
 request.close()

@@ -12,6 +12,8 @@ from catswalk.scraping.types.type_webdriver import EXECUTION_ENV, DEVICE, DEVICE
 import time
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+from PIL import Image
+from io import BytesIO
 
 class CWWebDriver:
     def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None, implicitly_wait = 5.0, debug:bool = False):
@@ -161,39 +163,6 @@ class CWWebDriver:
         soup = self.html
         return soup
 
-    def print_screen_by_position(self, w, h, output_path: str, filename:str):
-        """[summary]
-
-        Args:
-            w ([type]): [description]
-            h ([type]): [description]
-            output_path (str): [description]
-            filename (str): [description]
-        """
-        # set window size
-        self.driver.set_window_size(w, h)
-
-        # Get Screen Shot
-        fullpath = f"{output_path}/{filename}.png"
-        self.driver.save_screenshot(fullpath)
-        return fullpath
-
-    def print_screen_by_xpath(self, xpath:str, output_path: str, filename:str) -> str:
-        """[summary]
-
-        Args:
-            xpath (str): [description]
-            output_path (str): [description]
-            filename (str): [description]
-        """
-        # Get Screen Shot
-        fullpath = f"{output_path}/{filename}.png"
-        png = self.driver.find_element_by_xpath(xpath).screenshot_as_png
-        # ファイルに保存
-        with open(fullpath, 'wb') as f:
-            f.write(png)
-        return fullpath
-
     def print_screen_by_class_name(self, class_name:str, output_path: str, filename:str) -> str:
         """[summary]
 
@@ -204,27 +173,32 @@ class CWWebDriver:
         """
         # Get Screen Shot
         fullpath = f"{output_path}/{filename}.png"
-        # 範囲を指定してスクリーンショットを撮る
         png = self.driver.find_element_by_class_name(class_name).screenshot_as_png
         # ファイルに保存
         with open(fullpath, 'wb') as f:
             f.write(png)
         return fullpath
-    
-    def print_fullscreen(self, path, filename):
-        """[summary]
 
-        Args:
-            path ([type]): [description]
-            filename ([type]): [description]
 
-        Returns:
-            [type]: [description]
+    def print_screen_by_size(self, w, h, path, filename):
         """
-        # get width and height of the page
-        w = self.driver.execute_script("return document.body.scrollWidth;")
-        h = self.driver.execute_script("return document.body.scrollHeight;")
-        return self.print_screen_by_position(w, h, path, filename)
+        hw = self.driver.get_window_size()
+        w = hw["width"]
+        h = hw["height"]
+        """
+        img_binary = self.driver.get_screenshot_as_png()
+        img = Image.open(BytesIO(img_binary))
+        crop_dim = (0, 0, w, h) # left top right bottom
+        img = img.crop(crop_dim)
+        fullpath = f"{path}/{filename}.png"
+        img.save(fullpath)
+        return fullpath
+
+    def print_screen_by_hight(self, h, path, filename):
+        hw = self.driver.get_window_size()
+        w = hw["width"]
+        fullpath = self.print_screen_by_size(w, h, path, filename)
+        return fullpath
 
     def print_screen_by_window(self, path, filename):
         """[summary]
@@ -236,11 +210,10 @@ class CWWebDriver:
         Returns:
             [type]: [description]
         """
-        # get width and height of the page
-        hw = self.driver.get_window_size()
-        w = hw["width"]
-        h = hw["height"]
-        return self.print_screen_by_position(w, h, path, filename)
+        # Get Screen Shot
+        fullpath = f"{path}/{filename}.png"
+        self.driver.save_screenshot(fullpath)
+        return fullpath
 
     def __get_elem_by_class(self, class_name:str):
         if len(class_name.split(" ")) > 1:
@@ -290,7 +263,6 @@ class CWWebDriver:
         """
         element = self.__get_elem_by_class(class_name=class_name)
         element.location_once_scrolled_into_view
-        self.scroll_to_bottom()
         if self.debug:
             time.sleep(5)
 
