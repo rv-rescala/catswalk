@@ -262,6 +262,22 @@ class CWWebDriver:
         Returns:
             str: [description]
         """
+        # lazy対応
+        # https://stackoverflow.com/questions/62600288/how-to-handle-lazy-loaded-images-in-selenium
+        SCROLL_PAUSE_TIME = 0.5
+        i = 0
+        last_height = self.driver.execute_script("return document.body.scrollHeight")
+        while True:
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(SCROLL_PAUSE_TIME)
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+            i += 1
+            if i == 5:
+                break
+
         element = self.get_elem_by_class(class_name=class_name)
         element.location_once_scrolled_into_view
         if self.debug:
