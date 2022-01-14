@@ -145,7 +145,7 @@ class CWWebDriver:
         """
         print(f"wait_rendering_by_class: {_class}")
         if by_css_selector:
-            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.XPATH, _class)))
+            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, _class)))
         else:
             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, _class)))
 
@@ -180,7 +180,7 @@ class CWWebDriver:
         return fullpath
 
 
-    def print_screen_by_size(self, w, h, path, filename):
+    def print_screen_by_size(self, w, h, path, filename, start_w: int = 0, start_h: int = 0):
         """
         hw = self.driver.get_window_size()
         w = hw["width"]
@@ -188,16 +188,17 @@ class CWWebDriver:
         """
         img_binary = self.driver.get_screenshot_as_png()
         img = Image.open(BytesIO(img_binary))
-        crop_dim = (0, 0, w, h) # left top right bottom
+        print(f"print_screen_by_size, {start_w}, {start_h}, {w}, {h}")
+        crop_dim = (start_w, start_h, w, h) # left top right bottom
         img = img.crop(crop_dim)
         fullpath = f"{path}/{filename}.png"
         img.save(fullpath)
         return fullpath
 
-    def print_screen_by_hight(self, h, path, filename):
+    def print_screen_by_hight(self, h, path, filename, scale: int = 1):
         hw = self.driver.get_window_size()
-        w = hw["width"]
-        fullpath = self.print_screen_by_size(w, h, path, filename)
+        w = hw["width"] * scale
+        fullpath = self.print_screen_by_size(w=int(w), h=int(h), path=path, filename=filename)
         return fullpath
 
     def print_screen_by_window(self, path, filename):
@@ -215,10 +216,10 @@ class CWWebDriver:
         self.driver.save_screenshot(fullpath)
         return fullpath
 
-    def __get_elem_by_class(self, class_name:str):
+    def get_elem_by_class(self, class_name:str):
         if len(class_name.split(" ")) > 1:
             _class_name = "." + ".".join(class_name.split(" "))
-            #self.wait_rendering_by_class(_class_name, True)
+            self.wait_rendering_by_class(_class_name, True)
             elem = self.driver.find_element_by_css_selector(_class_name)
         else:
             self.wait_rendering_by_class(class_name, False)
@@ -235,7 +236,7 @@ class CWWebDriver:
             str: [description]
         """
         # Get Screen Shot
-        elem = self.__get_elem_by_class(class_name)
+        elem = self.get_elem_by_class(class_name)
         elem.click()
         if self.debug:
             time.sleep(5)
@@ -261,7 +262,7 @@ class CWWebDriver:
         Returns:
             str: [description]
         """
-        element = self.__get_elem_by_class(class_name=class_name)
+        element = self.get_elem_by_class(class_name=class_name)
         element.location_once_scrolled_into_view
         if self.debug:
             time.sleep(5)
