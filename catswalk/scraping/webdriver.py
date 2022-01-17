@@ -15,6 +15,8 @@ from selenium.webdriver.common.keys import Keys
 from PIL import Image
 from io import BytesIO
 
+logger = logging.getLogger()
+
 class CWWebDriver:
     def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None, implicitly_wait = 5.0, debug:bool = False):
         """[summary]
@@ -226,7 +228,7 @@ class CWWebDriver:
             elem = self.driver.find_element_by_class_name(class_name)
         return elem
 
-    def click_by_class_name(self, class_name:str) -> str:
+    def click_by_class_name(self, class_name:str, check_exist:bool = False) -> str:
         """[summary]
 
         Args:
@@ -236,6 +238,9 @@ class CWWebDriver:
             str: [description]
         """
         # Get Screen Shot
+        if check_exist:
+            if not self.is_exist_class(class_name=class_name):
+                return f"{class_name} not found"
         elem = self.get_elem_by_class(class_name)
         elem.click()
         if self.debug:
@@ -282,6 +287,25 @@ class CWWebDriver:
         element.location_once_scrolled_into_view
         if self.debug:
             time.sleep(5)
+
+    def is_exist_class(self, class_name: str) -> bool:
+        """[summary]
+
+        Args:
+            class_name (str): [description]
+
+        Returns:
+            bool: [description]
+        """
+        html = self.html
+        _class_name = "." + ".".join(class_name.split(" "))
+        if html.select(_class_name):
+            logger.debug(f"is_exist_class, {class_name} is found")
+            return True
+        else:
+            logger.debug(f"is_exist_class, {class_name} not found")
+            return False
+        
 
     @property
     def html(self):
