@@ -14,6 +14,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from PIL import Image
 from io import BytesIO
+from catswalk.scraping.driverfunc.wait import wait_until_images_loaded
+from catswalk.scraping.driverfunc.jquery import import_jquer
+
 
 logger = logging.getLogger()
 
@@ -33,6 +36,7 @@ class CWWebDriver:
         self.proxy = proxy
         self.device = device
         self.debug = debug
+        self.scrolled = False
 
         options = Options()
         if self.execution_env == EXECUTION_ENV.LOCAL_HEADLESS:
@@ -76,7 +80,6 @@ class CWWebDriver:
         #logging.info(f"WebDriverSession.__init__ : {binary_location}, {executable_path}, {proxy}, {execution_env}")
         self.driver = webdriver.Chrome(options=options, executable_path=self.executable_path, desired_capabilities=caps)
         self.driver.implicitly_wait(implicitly_wait)
-
 
 
     def __enter__(self):
@@ -158,6 +161,7 @@ class CWWebDriver:
             url (str): [description]
         """
         self.driver.get(url)
+        self.scrolled = False
 
     def get(self, url: str):
         self.transition(url=url)
@@ -215,6 +219,12 @@ class CWWebDriver:
         """
         # Get Screen Shot
         fullpath = f"{path}/{filename}.png"
+        wait_until_images_loaded(driver=self.driver)
+        if self.position_height != 0:
+            self.scroll_by_offset(offset=1)
+            self.scroll_by_offset(offset=-1)
+            self.scroll_by_offset(offset=-1)
+            self.scroll_by_offset(offset=1)
         self.driver.save_screenshot(fullpath)
         return fullpath
 
@@ -258,6 +268,24 @@ class CWWebDriver:
         for num in range(0, scroll_time):
             element.send_keys(Keys.PAGE_DOWN)
 
+    def smooth_scroll_to_bottom(self, scroll_pause_time = 0.5):
+        # lazy対応
+        # https://stackoverflow.com/questions/62600288/how-to-handle-lazy-loaded-images-in-selenium
+        print("smooth_scroll_to_bottom")
+        scroll_pause_time = 2.0
+        i = 0
+        last_height = self.driver.execute_script("return document.body.scrollHeight")
+        while True:
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(scroll_pause_time)
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+            i += 1
+            if i == 5:
+                break
+
     def move_to_element_by_class_name(self, class_name:str) -> str:
         """[summary]
 
@@ -267,24 +295,11 @@ class CWWebDriver:
         Returns:
             str: [description]
         """
-        # lazy対応
-        # https://stackoverflow.com/questions/62600288/how-to-handle-lazy-loaded-images-in-selenium
-        SCROLL_PAUSE_TIME = 0.5
-        i = 0
-        last_height = self.driver.execute_script("return document.body.scrollHeight")
-        while True:
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(SCROLL_PAUSE_TIME)
-            new_height = self.driver.execute_script("return document.body.scrollHeight")
-            if new_height == last_height:
-                break
-            last_height = new_height
-            i += 1
-            if i == 5:
-                break
-
+        if not self.scrolled:
+            self.smooth_scroll_to_bottom()
         element = self.get_elem_by_class(class_name=class_name)
         element.location_once_scrolled_into_view
+        self.scrolled = True
         if self.debug:
             time.sleep(5)
 
@@ -306,6 +321,11 @@ class CWWebDriver:
             logger.debug(f"is_exist_class, {class_name} not found")
             return False
         
+    @property
+    def position_height(self):
+        hight = self.driver.execute_script("return document.body.scrollHeight")
+        print(f"position_height: {hight}")
+        return hight
 
     @property
     def html(self):
