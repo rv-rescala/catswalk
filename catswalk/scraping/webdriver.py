@@ -169,6 +169,14 @@ class CWWebDriver:
         soup = self.html
         return soup
 
+    def __wait_print(self):
+        wait_until_images_loaded(driver=self.driver)
+        if self.position_height != 0:
+            self.scroll_by_offset(offset=1)
+            self.scroll_by_offset(offset=-1)
+            self.scroll_by_offset(offset=-1)
+            self.scroll_by_offset(offset=1)
+
     def print_screen_by_class_name(self, class_name:str, output_path: str, filename:str) -> str:
         """[summary]
 
@@ -179,6 +187,7 @@ class CWWebDriver:
         """
         # Get Screen Shot
         fullpath = f"{output_path}/{filename}.png"
+        self.__wait_print()
         png = self.driver.find_element_by_class_name(class_name).screenshot_as_png
         # ファイルに保存
         with open(fullpath, 'wb') as f:
@@ -192,6 +201,7 @@ class CWWebDriver:
         w = hw["width"]
         h = hw["height"]
         """
+        self.__wait_print()
         img_binary = self.driver.get_screenshot_as_png()
         img = Image.open(BytesIO(img_binary))
         print(f"print_screen_by_size, {start_w}, {start_h}, {w}, {h}")
@@ -201,7 +211,7 @@ class CWWebDriver:
         img.save(fullpath)
         return fullpath
 
-    def print_screen_by_hight(self, h, path, filename, scale: int = 1):
+    def print_screen_by_hight(self, h, path, filename, scale: int = 1, index:int = 1):
         if self.execution_env != EXECUTION_ENV.LOCAL:
             scale = 2
         hw = self.driver.get_window_size()
@@ -209,10 +219,10 @@ class CWWebDriver:
         fullpath = self.print_screen_by_size(w=int(w), h=int(h), path=path, filename=filename)
         return fullpath
 
-    def print_screen_by_class_hight(self, class_name, path, filename, scale: int = 1):
+    def print_screen_by_class_hight(self, class_name, path, filename, scale: int = 1, index:int = 1):
         if self.execution_env != EXECUTION_ENV.LOCAL:
             scale = 2
-        e = self.get_elem_by_class(class_name=class_name)
+        e = self.get_elem_by_class(class_name=class_name, index = index)
         location = e.location
         size = e.size
         #w, h = size['width'], size['height']
@@ -240,26 +250,22 @@ class CWWebDriver:
         """
         # Get Screen Shot
         fullpath = f"{path}/{filename}.png"
-        wait_until_images_loaded(driver=self.driver)
-        if self.position_height != 0:
-            self.scroll_by_offset(offset=1)
-            self.scroll_by_offset(offset=-1)
-            self.scroll_by_offset(offset=-1)
-            self.scroll_by_offset(offset=1)
+        self.__wait_print()
         self.driver.save_screenshot(fullpath)
         return fullpath
 
-    def get_elem_by_class(self, class_name:str):
+    def get_elem_by_class(self, class_name:str, index:int = 1):
         if len(class_name.split(" ")) > 1:
             _class_name = "." + ".".join(class_name.split(" "))
             self.wait_rendering_by_class(_class_name, True)
-            elem = self.driver.find_element_by_css_selector(_class_name)
+            elems = self.driver.find_elements_by_css_selector(_class_name)
         else:
             self.wait_rendering_by_class(class_name, False)
-            elem = self.driver.find_element_by_class_name(class_name)
-        return elem
+            elems = self.driver.find_elements_by_class_name(class_name)
+        print(f"get_elem_by_class len:{len(elems)}")
+        return elems[index - 1]
 
-    def click_by_class_name(self, class_name:str, check_exist:bool = False) -> str:
+    def click_by_class_name(self, class_name:str, check_exist:bool = False, index:int = 1) -> str:
         """[summary]
 
         Args:
@@ -272,7 +278,7 @@ class CWWebDriver:
         if check_exist:
             if not self.is_exist_class(class_name=class_name):
                 return f"{class_name} not found"
-        elem = self.get_elem_by_class(class_name)
+        elem = self.get_elem_by_class(class_name, index = index)
         elem.click()
         if self.debug:
             time.sleep(5)
@@ -307,7 +313,7 @@ class CWWebDriver:
             if i == 5:
                 break
 
-    def move_to_element_by_class_name(self, class_name:str) -> str:
+    def move_to_element_by_class_name(self, class_name:str, index:int = 1) -> str:
         """[summary]
 
         Args:
@@ -318,7 +324,7 @@ class CWWebDriver:
         """
         if not self.scrolled:
             self.smooth_scroll_to_bottom()
-        element = self.get_elem_by_class(class_name=class_name)
+        element = self.get_elem_by_class(class_name=class_name, index=index)
         element.location_once_scrolled_into_view
         self.scrolled = True
         if self.debug:
