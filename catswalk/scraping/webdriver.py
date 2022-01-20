@@ -38,6 +38,8 @@ class CWWebDriver:
         self.debug = debug
         self.scrolled = False
 
+        print(f"device: {device}")
+
         options = Options()
         if self.execution_env == EXECUTION_ENV.LOCAL_HEADLESS:
             options.binary_location = self.binary_location
@@ -72,7 +74,11 @@ class CWWebDriver:
             options.add_argument(f"proxy-server={self.proxy}")
 
         if device.value.mode == DEVICE_MODE.MOBILE:
-            mobile_emulation = { "deviceName": "Galaxy S5" }
+            device_name = device.value.agent
+            # https://chromium.googlesource.com/chromium/src/+/167a7f5e03f8b9bd297d2663ec35affa0edd5076/third_party/WebKit/Source/devtools/front_end/emulated_devices/module.json
+            #device_name = "Galaxy S5"
+            print(device_name)
+            mobile_emulation = { "deviceName": device_name }
             options.add_experimental_option("mobileEmulation", mobile_emulation)
 
         caps = DesiredCapabilities.CHROME
