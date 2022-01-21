@@ -305,13 +305,14 @@ class CWWebDriver:
         # lazy対応
         # https://stackoverflow.com/questions/62600288/how-to-handle-lazy-loaded-images-in-selenium
         print("smooth_scroll_to_bottom")
-        scroll_pause_time = 2.0
         i = 0
+        time.sleep(scroll_pause_time)
         last_height = self.driver.execute_script("return document.body.scrollHeight")
         while True:
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(scroll_pause_time)
             new_height = self.driver.execute_script("return document.body.scrollHeight")
+            print(f"smooth_scroll_to_bottom: {new_height}")
             if new_height == last_height:
                 break
             last_height = new_height
