@@ -225,20 +225,21 @@ class CWWebDriver:
         fullpath = self.print_screen_by_size(w=int(w), h=int(h), path=path, filename=filename)
         return fullpath
 
-    def print_screen_by_class_hight(self, class_name, path, filename, scale: int = 1, index:int = 1):
-        if self.execution_env != EXECUTION_ENV.LOCAL:
-            scale = 2
+    def print_screen_by_class_hight(self, class_name, path, filename, index:int = 1):
         e = self.get_elem_by_class(class_name=class_name, index = index)
         location = e.location
         size = e.size
         #w, h = size['width'], size['height']
-        #print(f"class_location: {location},class_w: {w},class_hight{h}")
-
         window_hw = self.driver.get_window_size()
-        w = int(window_hw["width"]) * scale
-        print(f"w: {w}")
+        print(f"print_screen_by_class_hight: location: {location}, size: {size}, window_hw: {window_hw}")
 
-        h = int(location["y"]) * scale
+        if self.execution_env == EXECUTION_ENV.LOCAL:
+            w = int(window_hw["width"]) * 1
+            h = int(location["y"]) * 2
+        else:
+            w = int(window_hw["width"]) * 2
+            h = int(location["y"]) * 2
+        print(f"w: {w}")
         print(f"h: {h}")
 
         fullpath = self.print_screen_by_size(w=w, h=h, path=path, filename=filename)
