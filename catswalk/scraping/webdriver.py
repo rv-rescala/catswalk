@@ -37,6 +37,7 @@ class CWWebDriver:
         self.device = device
         self.debug = debug
         self.scrolled = False
+        self.prev_class = None
 
         print(f"device: {device}")
 
@@ -173,6 +174,7 @@ class CWWebDriver:
         self.transition(url=url)
         #WebDriverWait(self.driver, 10).until(EC.url_changes(url))
         soup = self.html
+        self.driver.maximize_window()
         return soup
 
     def __wait_print(self):
@@ -208,6 +210,9 @@ class CWWebDriver:
         h = hw["height"]
         """
         self.__wait_print()
+        self.driver.save_screenshot(f"{path}/tmp_{filename}.png")
+        print(f"print_screen_by_size: {start_w}, {start_h}, {w}, {h}")
+        
         img_binary = self.driver.get_screenshot_as_png()
         img = Image.open(BytesIO(img_binary))
         print(f"print_screen_by_size, {start_w}, {start_h}, {w}, {h}")
@@ -215,6 +220,7 @@ class CWWebDriver:
         img = img.crop(crop_dim)
         fullpath = f"{path}/{filename}.png"
         img.save(fullpath)
+        
         return fullpath
 
     def print_screen_by_hight(self, h, path, filename, scale: int = 1, index:int = 1):
@@ -226,23 +232,51 @@ class CWWebDriver:
         return fullpath
 
     def print_screen_by_class_hight(self, class_name, path, filename, index:int = 1):
-        e = self.get_elem_by_class(class_name=class_name, index = index)
-        location = e.location
-        size = e.size
-        #w, h = size['width'], size['height']
+        current_e = self.get_elem_by_class(class_name=class_name, index = index)
+        current_location = current_e.location
+        current_size = current_e.size
         window_hw = self.driver.get_window_size()
-        print(f"print_screen_by_class_hight: location: {location}, size: {size}, window_hw: {window_hw}")
+        print(f"print_screen_by_class_hight: location: {current_location}, size: {current_size}, window_hw: {window_hw}")
 
+        # htmlタグからクライアントのwindowサイズを抜き出す
+        html = self.driver.find_element_by_tag_name('html')
+        inner_width = int(html.get_attribute("clientWidth"))
+        inner_height = int(html.get_attribute("clientHeight"))
+        print(f"inner_width: {inner_width}, inner_height:{inner_height}")
+
+        # prev_class info
+        prev_e = None
+        if self.prev_class:
+            print(f"prev_class: {self.prev_class}")
+            prev_e = self.get_elem_by_class(class_name=self.prev_class["class_name"], index = self.prev_class["index"])
+            prev_location = prev_e.location
         if self.execution_env == EXECUTION_ENV.LOCAL:
-            w = int(window_hw["width"]) * 1
-            h = int(location["y"]) * 2
+            if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
+                scale = 2
+            else:
+                scale = 3
+            w = inner_width * scale
+            if prev_e:
+                print(f'current_location_y {current_location["y"]}, prev_location_y: {prev_location["y"]}, current_size_height_: {current_size["height"]}')
+                h = (current_location["y"] - prev_location["y"]) * scale - (current_size["height"] / 2)
+            else:
+                h = current_location["y"] * scale
         else:
-            w = int(window_hw["width"]) * 2
-            h = int(location["y"]) * 2
+            if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
+                scale = 2
+            else:
+                scale = 3
+            w = inner_width * scale
+            if prev_e:
+                print(f'current_location_y {current_location["y"]}, prev_location_y: {prev_location["y"]}, current_size_height_: {current_size["height"]}')
+                h = (current_location["y"] - prev_location["y"]) * scale - (current_size["height"] / 2)
+            else:
+                h = current_location["y"] * scale
         print(f"w: {w}")
         print(f"h: {h}")
 
         fullpath = self.print_screen_by_size(w=w, h=h, path=path, filename=filename)
+
         return fullpath
 
     def print_screen_by_window(self, path, filename):
@@ -270,7 +304,16 @@ class CWWebDriver:
             self.wait_rendering_by_class(class_name, False)
             elems = self.driver.find_elements_by_class_name(class_name)
         print(f"get_elem_by_class len:{len(elems)}")
-        return elems[index - 1]
+
+        e = elems[index - 1]
+        """
+        location = e.location
+        size = e.size
+        #w, h = size['width'], size['height']
+        window_hw = self.driver.get_window_size()
+        print(f"get_elem_by_class: class_name: {class_name}, location: {location}, size: {size}, window_hw: {window_hw}")
+        """
+        return e
 
     def click_by_class_name(self, class_name:str, check_exist:bool = False, index:int = 1) -> str:
         """[summary]
@@ -335,6 +378,7 @@ class CWWebDriver:
         element = self.get_elem_by_class(class_name=class_name, index=index)
         element.location_once_scrolled_into_view
         self.scrolled = True
+        self.prev_class = {"class_name": class_name, "index": index}
         if self.debug:
             time.sleep(5)
 
