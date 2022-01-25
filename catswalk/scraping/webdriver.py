@@ -210,7 +210,7 @@ class CWWebDriver:
         h = hw["height"]
         """
         self.__wait_print()
-        self.driver.save_screenshot(f"{path}/tmp_{filename}.png")
+        #self.driver.save_screenshot(f"{path}/tmp_{filename}.png")
         print(f"print_screen_by_size: {start_w}, {start_h}, {w}, {h}")
         
         img_binary = self.driver.get_screenshot_as_png()
@@ -224,10 +224,26 @@ class CWWebDriver:
         return fullpath
 
     def print_screen_by_hight(self, h, path, filename, scale: int = 1, index:int = 1):
-        if self.execution_env != EXECUTION_ENV.LOCAL:
-            scale = 2
-        hw = self.driver.get_window_size()
-        w = hw["width"] * scale
+        # htmlタグからクライアントのwindowサイズを抜き出す
+        html = self.driver.find_element_by_tag_name('html')
+        inner_width = int(html.get_attribute("clientWidth"))
+        inner_height = int(html.get_attribute("clientHeight"))
+        print(f"inner_width: {inner_width}, inner_height:{inner_height}")
+
+        if self.execution_env == EXECUTION_ENV.LOCAL:
+            if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
+                scale = 2
+            else:
+                scale = 3
+            w = inner_width * scale
+            #scaled_h = h * scale
+        else:
+            if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
+                scale = 2
+            else:
+                scale = 3
+            w = inner_width * scale
+            #scaled_h = h * scale
         fullpath = self.print_screen_by_size(w=int(w), h=int(h), path=path, filename=filename)
         return fullpath
 
@@ -245,6 +261,7 @@ class CWWebDriver:
         print(f"inner_width: {inner_width}, inner_height:{inner_height}")
 
         # prev_class info
+        # TBD: Desktop & Lamdaの時の横のscaleを正す
         prev_e = None
         if self.prev_class:
             print(f"prev_class: {self.prev_class}")
