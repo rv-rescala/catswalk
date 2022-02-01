@@ -42,6 +42,8 @@ class CWWebDriver:
         print(f"device: {device}")
 
         options = Options()
+        options.add_argument('--incognito')          # シークレットモードの設定を付与
+
         if self.execution_env == EXECUTION_ENV.LOCAL_HEADLESS:
             options.binary_location = self.binary_location
             options.add_argument('--headless') # https://www.ytyng.com/blog/ubuntu-chromedriver/
@@ -73,6 +75,7 @@ class CWWebDriver:
         if self.proxy:
             logging.info("WebDriverSession proxy on")
             options.add_argument(f"proxy-server={self.proxy}")
+
 
         if device.value.mode == DEVICE_MODE.MOBILE:
             device_name = device.value.agent
