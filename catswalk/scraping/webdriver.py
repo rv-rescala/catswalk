@@ -69,6 +69,8 @@ class CWWebDriver:
             options.add_argument("--ignore-certificate-errors")
             options.add_argument("--homedir=/tmp")
             options.add_argument('--disable-dev-shm-usage')
+            # --no-zygote, https://qiita.com/grainrigi/items/3f13b949310b669d08bb
+            options.add_argument('--no-zygote')
         else:
             options.binary_location = self.binary_location
         if self.proxy:
@@ -112,6 +114,7 @@ class CWWebDriver:
         """[Close WebDriverSession, if chromewebdriver dosen't kill, plsease execute "killall chromedriver"]
         
         """
+        self.driver.close()
         self.driver.quit()
 
     def reload(self):
