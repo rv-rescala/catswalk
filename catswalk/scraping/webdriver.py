@@ -50,7 +50,7 @@ class CWWebDriver:
             options.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
             #options.add_argument("start-maximized")  # open Browser in maximized mode
             options.add_argument("--window-size=1280x651")
-            options.add_argument("disable-infobars")  # disabling infobars
+            options.add_argument("--disable-infobars")  # disabling infobars
             options.add_argument("--disable-extensions")  # disabling extensions
             options.add_argument("--disable-gpu")  # applicable to windows os only
             options.add_argument("--no-sandbox")  # Bypass OS security model
@@ -64,7 +64,8 @@ class CWWebDriver:
             options.add_argument("--window-size=1280x651")
             options.add_argument("--disable-application-cache")
             options.add_argument("--disable-infobars")
-            options.add_argument("--hide-scrollbars")
+            #options.add_argument("--hide-scrollbars")
+            options.add_argument("--disable-extensions")  # disabling extensions
             options.add_argument("--enable-logging")
             options.add_argument("--log-level=0")
             options.add_argument("--ignore-certificate-errors")
