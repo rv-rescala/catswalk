@@ -247,6 +247,12 @@ class CWWebDriver:
                 scale = 3
             w = inner_width * scale
             #scaled_h = h * scale
+        elif self.execution_env == EXECUTION_ENV.AWS_LAMBDA:
+            if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
+                scale = 1
+            else:
+                scale = 3
+            w = inner_width * scale
         else:
             if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
                 scale = 2
@@ -288,6 +294,12 @@ class CWWebDriver:
                 h = (current_location["y"] - prev_location["y"]) * scale - (current_size["height"] / 2)
             else:
                 h = current_location["y"] * scale
+        elif self.execution_env == EXECUTION_ENV.AWS_LAMBDA:
+            if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
+                scale = 1
+            else:
+                scale = 3
+            w = inner_width * scale
         else:
             if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
                 scale = 2
