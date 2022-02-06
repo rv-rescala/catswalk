@@ -250,6 +250,7 @@ class CWWebDriver:
         elif self.execution_env == EXECUTION_ENV.AWS_LAMBDA:
             if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
                 scale = 1
+                h = int(h) / 2
             else:
                 scale = 3
             w = inner_width * scale
@@ -297,6 +298,7 @@ class CWWebDriver:
         elif self.execution_env == EXECUTION_ENV.AWS_LAMBDA:
             if self.device == DEVICE.MOBILE_iPad_Pro or self.device == DEVICE.DESKTOP_GENERAL:
                 scale = 1
+                h = int(h) / 2
             else:
                 scale = 3
             w = inner_width * scale
