@@ -48,7 +48,8 @@ class CWWebDriver:
             options.binary_location = self.binary_location
             options.add_argument('--headless') # https://www.ytyng.com/blog/ubuntu-chromedriver/
             options.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
-            options.add_argument("start-maximized")  # open Browser in maximized mode
+            #options.add_argument("start-maximized")  # open Browser in maximized mode
+            options.add_argument("--window-size=1280x651")
             options.add_argument("disable-infobars")  # disabling infobars
             options.add_argument("--disable-extensions")  # disabling extensions
             options.add_argument("--disable-gpu")  # applicable to windows os only
@@ -60,7 +61,7 @@ class CWWebDriver:
             options.add_argument("--no-sandbox")
             options.add_argument("--single-process")
             options.add_argument("--disable-gpu")
-            options.add_argument("--window-size=1280x1696")
+            options.add_argument("--window-size=1280x651")
             options.add_argument("--disable-application-cache")
             options.add_argument("--disable-infobars")
             options.add_argument("--hide-scrollbars")
@@ -91,6 +92,9 @@ class CWWebDriver:
         #logging.info(f"WebDriverSession.__init__ : {binary_location}, {executable_path}, {proxy}, {execution_env}")
         self.driver = webdriver.Chrome(options=options, executable_path=self.executable_path, desired_capabilities=caps)
         self.driver.implicitly_wait(implicitly_wait)
+
+        if device.value.mode == DEVICE_MODE.DESKTOP:
+            self.driver.maximize_window()
 
 
     def __enter__(self):
