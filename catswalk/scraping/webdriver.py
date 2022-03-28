@@ -21,7 +21,7 @@ from catswalk.scraping.driverfunc.jquery import import_jquer
 logger = logging.getLogger()
 
 class CWWebDriver:
-    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None, implicitly_wait = 5.0, debug:bool = False):
+    def __init__(self, binary_location: str = None, executable_path: str = None, execution_env: EXECUTION_ENV = EXECUTION_ENV.LOCAL, device = DEVICE.DESKTOP_GENERAL, proxy: str = None, implicitly_wait = 5.0, debug:bool = False, is_secret_mode: bool = True):
         """[summary]
 
         Args:
@@ -42,7 +42,8 @@ class CWWebDriver:
         print(f"device: {device}")
 
         options = Options()
-        options.add_argument('--incognito')          # シークレットモードの設定を付与
+        if is_secret_mode:
+            options.add_argument('--incognito')          # シークレットモードの設定を付与
 
         if self.execution_env == EXECUTION_ENV.LOCAL_HEADLESS:
             options.binary_location = self.binary_location
@@ -171,7 +172,7 @@ class CWWebDriver:
         else:
             WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, _class)))
 
-    def transition(self, url: str):
+    def transition(self, url: str, remove_class: str = None):
         """[summary]
 
         Args:
@@ -180,8 +181,15 @@ class CWWebDriver:
         self.driver.get(url)
         self.scrolled = False
 
-    def get(self, url: str):
-        self.transition(url=url)
+        if remove_class:
+            print(f"remove class {remove_class}")
+            self.driver.execute_script(f"""
+                var l = document.getElementsByClassName('{remove_class}')[0];
+                l.parentNode.removeChild(l);
+            """)
+
+    def get(self, url: str, remove_class: str = None):
+        self.transition(url=url, remove_class=remove_class)
         #WebDriverWait(self.driver, 10).until(EC.url_changes(url))
         soup = self.html
         self.driver.maximize_window()
